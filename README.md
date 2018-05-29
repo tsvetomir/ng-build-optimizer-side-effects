@@ -1,27 +1,54 @@
-# BuildOptimizerClean
+# Build Optimizer - Bug report
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 6.0.5.
+Reproduction case for a bug with the Angular build optimizer.
 
-## Development server
+Consider the following modules:
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+`foo/bar.ts`
 
-## Code scaffolding
+```ts
+export class Bar {
+  static baz(): void {}
+}
+```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+`foo/baz.ts`
 
-## Build
+```ts
+import { Bar } from './bar';
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+Bar.baz = function() {
+  alert('Hello');
+}
+```
 
-## Running unit tests
+`app.component.ts`
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+```ts
+import { Bar } from './foo/bar';
+import './foo/baz';
 
-## Running end-to-end tests
+const bar = Bar.baz();
+```
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+When the build optimizer is enabled, the code results in an error - `Bar is not defined`.
+Turning either the build optimizer _or_ source maps resolves the issue.
 
-## Further help
+## Steps to Reproduce
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+* `npm install`
+* `ng serve --prod`
+* Error in console: `Uncaught ReferenceError: Bar is not defined`
+
+## Correct Behavior - with source maps turned off
+
+* Set `sourceMap` to `false` in `angular.json:40`.
+* `ng serve --prod`
+* Alert appears, no error in console
+
+## Correct Behavior - with build optimizer turned off
+
+* Set `buildOptimizer` to `false` in `angular.json:46`.
+* `ng serve --prod`
+* Alert appears, no error in console
+
