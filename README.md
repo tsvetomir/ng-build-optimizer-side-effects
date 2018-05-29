@@ -32,7 +32,7 @@ const bar = Bar.baz();
 ```
 
 When the build optimizer is enabled, the code results in an error - `Bar is not defined`.
-Turning either the build optimizer _or_ source maps resolves the issue.
+Turning either the build optimizer _or_ source maps off resolves the issue.
 
 ## Steps to Reproduce
 
